@@ -1,0 +1,52 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate skill structure
+        run: |
+          set -euo pipefail
+
+          if [ ! -f "SKILL.md" ]; then
+            echo "SKILL.md is missing"
+            exit 1
+          fi
+
+          name_line=$(grep -m1 '^name:' SKILL.md || true)
+          name_value=$(echo "$name_line" | sed 's/^name:[[:space:]]*//' | tr -d '[:space:]')
+          if [ -z "$name_value" ]; then
+            echo "SKILL.md frontmatter is missing a non-empty name:"
+            exit 1
+          fi
+
+          description_line=$(grep -m1 '^description:' SKILL.md || true)
+          description_value=$(echo "$description_line" | sed 's/^description:[[:space:]]*//' | tr -d '[:space:]')
+          if [ -z "$description_value" ]; then
+            echo "SKILL.md frontmatter is missing a non-empty description:"
+            exit 1
+          fi
+
+          repo_dir_name=$(basename "$(pwd)")
+          if [ "$name_value" != "$repo_dir_name" ]; then
+            echo "SKILL.md name ($name_value) does not match repo directory name ($repo_dir_name)"
+            exit 1
+          fi
+
+          if [ ! -f "README.md" ]; then
+            echo "README.md is missing"
+            exit 1
+          fi
+
+          if ! grep -q "SKILL.md" README.md; then
+            echo "README.md does not link to SKILL.md"
+            exit 1
+          fi
+
+          echo "All checks passed."

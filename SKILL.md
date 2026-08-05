@@ -154,6 +154,15 @@ say so plainly - "no P0 findings" is a valid and common result.
   `theme.extend`. Arbitrary-value classes (`bg-[#2563eb]`, `p-[13px]`, `text-[15px]`) are the
   drift signal in a Tailwind codebase - treat every arbitrary-value bracket as a raw-value
   hit in the matching category (color, spacing, font-size). A safelist entry is not drift.
+- **Literals that are raw on purpose.** Some values are not drift, and flagging them buries
+  the ones that are. Exclude these by default: brand-mark colors inside an inline SVG logo
+  (fixed by brand guidelines, not themeable), third-party or vendor stylesheets the team
+  does not own and cannot edit, and email templates - most email clients do not resolve CSS
+  custom properties, so a literal there is the working choice rather than a mistake. Do not
+  drop them silently: list them under an "Excluded from the count" note after the
+  consolidation plan, one line each with the reason, so every exclusion stays reviewable.
+  If the user says one of them should be tokenized after all, move it back into the tables
+  and update the summary counts.
 - **CSS-in-JS with computed values.** If a color or spacing value is computed at runtime
   (e.g. `darken(theme.primary, 0.1)`), do not flag it as raw - it already derives from a
   token. Only flag literals that do not reference any token.

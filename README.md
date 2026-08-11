@@ -106,12 +106,16 @@ real client or a real repo.
 | File:line | Value | Nearest token | Suggested fix |
 |---|---|---|---|
 | src/components/Card.tsx:15 | padding: 13px | --space-3 (12px) | round to nearest scale step |
+| src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted | no state, no theme - replace when the file is next touched |
 
 ## Consolidation plan
 1. Replace 3 raw #2563EB literals in Button.tsx with the existing primary token.
 2. Replace the overlay rgba() literal in Modal.tsx with --color-overlay.
 3. Round the 9 off-scale spacing values to the nearest 4px step, one component at a time.
 ```
+
+Abridged - the P2 table and the rename proposal are cut here, so the summary counts above run
+ahead of the rows shown.
 
 ## How it works
 

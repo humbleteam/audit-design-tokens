@@ -114,8 +114,20 @@ without waiting for the others.
 3. ...
 ```
 
-Counts in the summary must equal the row counts in the tables below them. If a category has
-zero findings, keep its row in the summary showing 0 and omit its table.
+Reconcile the summary against the tables before shipping the report. The summary carries two
+kinds of number, and only one of them is a row count:
+
+- **Drift counts** - raw colors, off-scale spacing, near-duplicate pairs, hardcoded z-index.
+  Each of these findings is a row in exactly one of the P0/P1/P2 tables, so the summary count
+  must equal the number of rows carrying that category across all three tables. A
+  near-duplicate pair is one finding on one row naming both locations, not two rows.
+- **Inventory counts** - distinct font sizes in use, radius variants, shadow variants. These
+  count distinct values in the codebase, most of which are not drift, so they never match a
+  row count: a clean codebase with six tokenized font sizes reports 6 and opens no rows at
+  all. Reconcile them against the values instead - state the count, list the distinct values,
+  and open a P1 row only for what is past the threshold.
+
+If a category has zero findings, keep its row in the summary showing 0 and omit its table.
 
 ## Severity rules
 
@@ -123,9 +135,20 @@ zero findings, keep its row in the summary showing 0 and omit its table.
   inside a component that also renders under a dark-mode or alternate-theme selector
   elsewhere in the codebase. This is the category that visibly breaks for users.
 - **P1**: off-scale spacing, font-size sprawl past 8-10 sizes, radius/shadow variants past
-  3-4 levels. Does not break anything today but actively degrades consistency.
+  3-4 levels, and any raw color that meets neither P0 condition (see the default below).
+  Does not break anything today but actively degrades consistency.
 - **P2**: near-duplicate colors, isolated z-index literals, anything a reasonable team could
   ship as-is and clean up opportunistically.
+
+**Every raw color gets a bucket.** A literal that sits on no interactive state and inside no
+component rendered under an alternate theme - a background on a static marketing banner in a
+codebase with no dark mode - still has to land somewhere. It defaults to **P1**: it breaks
+nothing for a user today and degrades consistency, which is what P1 means. Downgrade it to P2
+only when the literal is genuinely one-off: a single value in a component nothing else shares,
+with no near-duplicate anywhere in the scan. Without this default, the category Step 2 calls
+the highest-value one has no home in an unthemed codebase, since P0 requires a state or a
+theme, P1 listed only spacing and type, and P2 listed only near-duplicate pairs and z-index -
+leaving the finding to be dropped from the report or inflated to P0 against the rule below.
 
 Never invent a P0 finding to make the report look more urgent. If nothing qualifies as P0,
 say so plainly - "no P0 findings" is a valid and common result.

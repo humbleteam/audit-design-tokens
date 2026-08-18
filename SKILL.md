@@ -23,17 +23,45 @@ nothing useful.
 Search the target path (default: repo root, or the path the user names) for token
 definitions, in this order:
 
-1. CSS custom properties: `--[a-z-]+:\s*(#|rgb|hsl|oklch)` inside `:root`, `:host`, or a
-   `[data-theme]` selector.
+1. CSS custom properties: `--[A-Za-z0-9_-]+\s*:` inside `:root`, `:host`, or a
+   `[data-theme]` selector - match the declaration, then classify by the value. Matching on
+   the value instead finds only part of the set: a pattern anchored to `#|rgb|hsl|oklch`
+   returns colors only, and one whose name class excludes digits also drops
+   `--blue-500` and `--gray-100`, which is how most palettes are named. Both misses are
+   worse than no match at all, because an undiscovered token is not treated as missing -
+   it is treated as absent, and every correct use of its value elsewhere in the codebase
+   is then reported as raw drift against a token that exists.
 2. Tailwind config: `theme.colors`, `theme.spacing`, `theme.extend.colors`,
    `theme.extend.spacing` in `tailwind.config.js` / `.ts` / `.mjs`.
 3. A dedicated tokens file: `tokens.json`, `theme.ts`, `theme.js`, `design-tokens.*`.
 4. styled-components / Emotion theme objects passed to `ThemeProvider`.
 
-Record every token found as `name -> value` per category (color, spacing, radius, shadow,
-font-size, z-index). This list is the baseline every other file gets checked against. If
-more than one source exists (e.g. CSS variables AND a Tailwind config), treat both as valid
-tokens - report a value as drift only if it matches neither.
+Record every token found as `name -> value` per category. The value's shape decides what a
+token can be, and the name only splits the categories the shape cannot tell apart, since
+`--space-3: 12px`, `--radius-md: 8px` and `--font-size-lg: 1.25rem` are all one length:
+
+| Value shape | Category |
+|---|---|
+| `#hex`, `rgb()`, `rgba()`, `hsl()`, `hsla()`, `oklch()`, a named CSS color | color |
+| an offset/blur/spread list ending in a color | shadow |
+| a bare integer | z-index |
+| a single length in `px`, `rem`, `em` | spacing, radius, or font-size - split on the name (`space`/`gap`/`inset`, `radius`/`corner`, `font`/`text`/`size`) |
+
+Shape wins over name where they disagree: `--brand-blue: 8px` is a length, so it is not a
+color whatever it is called. A length whose name matches none of the three groups is
+recorded as spacing, the scale it most often belongs to, and named in the report as an
+assumption.
+
+This list is the baseline every other file gets checked against. If more than one source
+exists (e.g. CSS variables AND a Tailwind config), treat both as valid tokens - report a
+value as drift only if it matches neither.
+
+**Then write down which categories have a baseline and which do not.** A codebase with a
+`:root` block of brand colors and no spacing scale is normal, not broken, and it is the
+common starting shape. The stop rule above fires only when the token set is completely
+empty, so a partial set reaches Step 2 and every category it does not cover has nothing to
+be checked against. Carry that list into Steps 2 and 3 - it decides what can be audited at
+all.
 
 ## Step 2: scan for drift
 
@@ -46,9 +74,15 @@ lockfiles. For each category below, collect every match with its file and line n
   definition found in Step 1. This is the highest-value category - it is what makes theming
   and dark mode break.
 - **Off-scale spacing.** Any `margin`, `padding`, `gap`, `top/right/bottom/left`, or `width/
-  height` value in `px` or `rem` that is not a multiple of the codebase's spacing base (infer
-  the base from the token list - most commonly 4px or 8px) and is not itself a spacing token
-  reference. `padding: 13px` on a 4px scale is drift; `padding: 16px` is not.
+  height` value in `px` or `rem` that is not a multiple of the codebase's spacing base and is
+  not itself a spacing token reference. `padding: 13px` on a 4px scale is drift;
+  `padding: 16px` is not. Infer the base from the spacing tokens Step 1 recorded - the
+  greatest common divisor of the scale, usually 4px or 8px. **If Step 1 found no spacing
+  tokens, there is no base and this category is not audited.** Do not fall back to 4px or
+  8px because they are common: a codebase that never had a spacing scale would have every
+  odd value reported as drift against a standard it never adopted, which is the same
+  invented baseline the no-tokens stop rule exists to prevent, applied one category at a
+  time instead of all at once.
 - **Near-duplicate colors.** Group all raw and token colors by hue (convert to HSL). Flag
   pairs within the same category (background, text, border) whose lightness differs by less
   than 5% or whose values differ by a handful of hex units - these are merge candidates, not
@@ -63,6 +97,15 @@ lockfiles. For each category below, collect every match with its file and line n
   shared constant. Collect all of them sorted by value - an ungoverned z-index list is a
   common source of stacking bugs even when nothing else in the design system has drifted.
 
+**A category with no baseline is not scanned as drift.** Drift means a distance from a
+known-good value, so where Step 1 found no token of that category there is nothing to
+measure against and every literal would be reported as a violation of a rule the codebase
+never set. This applies to raw colors and off-scale spacing, which need a token to drift
+from. It does not apply to font-size sprawl, radius and shadow variants, or near-duplicate
+colors: those compare the codebase against itself, so they run on any codebase. Hardcoded
+z-index runs too - with no z-index token every literal is ungoverned, which is the finding
+rather than a false positive, and it stays P2.
+
 ## Step 3: write the report
 
 Output in this exact structure. Use real file paths and line numbers from the scan - never
@@ -73,6 +116,7 @@ invent a location.
 
 ## Summary
 - Token sources found: <list, e.g. "CSS custom properties (32 tokens), tailwind.config.js theme (8 colors)">
+- Categories with a baseline: <list> · no baseline: <list, or "none">
 - Raw colors outside tokens: <count>
 - Off-scale spacing values: <count>
 - Near-duplicate color pairs: <count>
@@ -129,6 +173,16 @@ kinds of number, and only one of them is a row count:
 
 If a category has zero findings, keep its row in the summary showing 0 and omit its table.
 
+A count of 0 and a category that could not be audited are different results and must not
+share a number. `0` says the scan ran and the codebase is clean; a category with no baseline
+was never scanned, and reporting it as 0 claims a clean bill of health for the one part of
+the system nobody has defined yet. Write `no baseline - no <category> tokens found` in place
+of the count, and say what would unlock it: define the scale first, or run
+`extract-design-tokens` against the codebase's own most-used values to propose one. The same
+goes for the `Nearest token` column - where no token of that category exists there is no
+nearest one, so the cell says `none defined` and the suggested fix is to define the token,
+never a token name invented to fill the column.
+
 ## Severity rules
 
 - **P0**: a hardcoded color sits on an interactive state (hover/focus/active/disabled) or
@@ -170,6 +224,13 @@ say so plainly - "no P0 findings" is a valid and common result.
 - **No token definitions found at all.** Stop the audit. Tell the user there is nothing to
   audit drift against, and point them at the `extract-design-tokens` skill to pull a token
   set from a URL, screenshot, or the codebase's own most-used values first.
+- **A partial token set.** Colors defined, nothing else - the commonest real shape, since a
+  `:root` of brand colors is where most teams start. The audit runs, and it runs only on the
+  categories that have a baseline plus the ones that compare the codebase against itself.
+  Say which categories were audited and which were not, in the summary and in one line of
+  the report, so a short report reads as limited coverage rather than a clean codebase. Do
+  not stop the audit: the color half is real work, and the missing scales are worth naming
+  as the gap they are.
 - **Monorepo.** If the target path contains multiple `package.json` files with independent
   `src/` trees, ask which package to scan, or scan only the path the user named. Do not
   silently scan the whole monorepo - drift counts across unrelated apps are not comparable.

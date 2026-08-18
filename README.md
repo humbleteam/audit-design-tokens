@@ -87,6 +87,7 @@ real client or a real repo.
 
 ## Summary
 - Token sources found: CSS custom properties (22 tokens), tailwind.config.js theme (6 colors)
+- Categories with a baseline: color, spacing, radius · no baseline: shadow, z-index
 - Raw colors outside tokens: 14
 - Off-scale spacing values: 9
 - Near-duplicate color pairs: 3
@@ -121,8 +122,11 @@ ahead of the rows shown.
 
 - **Token source first.** The skill locates the codebase's actual token definitions before
   scanning anything - CSS custom properties, a Tailwind theme, a tokens file, or a
-  styled-components theme object. Nothing counts as drift until there is a known-good value
-  to drift from.
+  styled-components theme object. It matches every custom-property declaration and sorts it
+  by the shape of its value, so a palette named `--blue-500` and a `--space-3` land in the
+  right categories instead of being missed and then counted as drift against themselves.
+  Nothing counts as drift until there is a known-good value to drift from: a category with
+  no tokens is reported as having no baseline, never as zero findings.
 - **File:line, not vibes.** Every finding traces to a real location the skill scanned. Nothing
   in the report is invented or estimated.
 - **Category by category.** Colors, spacing, near-duplicates, font sizes, radii, shadows, and
@@ -167,6 +171,15 @@ explicitly ask it to apply a specific step after reviewing the report.
 The skill stops and tells you rather than inventing a baseline to audit against. Use
 [extract-design-tokens](https://github.com/humbleteam/extract-design-tokens) first to pull a
 starting token set from a URL, screenshot, or the codebase's own most common values.
+
+**What if we only have colors defined, and no spacing scale?**
+The audit runs on what has a baseline and says so. Colors get the full treatment; spacing
+comes back as `no baseline - no spacing tokens found` rather than as `0 off-scale values`,
+because a zero would read as a clean spacing scale when what you have is no spacing scale.
+The same rule holds per category for radius, shadows, and type. Categories that compare the
+codebase against itself - font-size sprawl, radius and shadow counts, near-duplicate colors,
+ungoverned z-index - run either way, since they need no token to measure against. A partial
+token set is the normal starting shape, not a reason to refuse the audit.
 
 **Does this work with Tailwind?**
 Yes. It compares class usage against `tailwind.config.js`'s theme and treats

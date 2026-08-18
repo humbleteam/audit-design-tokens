@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.3.0] - 2026-08-18
+
+- Token discovery no longer misses most of the token set. The CSS custom-property
+  pattern was anchored to the value (`--[a-z-]+:\s*(#|rgb|hsl|oklch)`), so it
+  matched colors only, and its name class excluded digits, so it also missed
+  `--blue-500` and `--gray-100`. Against a ten-token `:root` block it found two.
+  An undiscovered token is not treated as missing but as absent, so every correct
+  use of its value elsewhere was reported as raw drift against a token that
+  exists. The pattern now matches the declaration and Step 1 classifies by the
+  shape of the value, with a category table.
+- A category with no tokens now has defined behavior. The stop rule fired only on
+  a completely empty token set, so the common shape - brand colors defined, no
+  spacing scale - reached Step 2, where the spacing base was to be inferred from
+  a token list that contained no spacing. The fallback ("most commonly 4px or
+  8px") is the invented baseline the skill's own FAQ promises it never uses.
+  Categories without a baseline are not scanned as drift; categories that compare
+  the codebase against itself (font-size sprawl, radius and shadow counts,
+  near-duplicate colors, ungoverned z-index) still run.
+- The summary can no longer report `0` for a category it never audited. It states
+  which categories have a baseline, and an unaudited one reads
+  `no baseline - no spacing tokens found` with what would unlock it. The
+  `Nearest token` column says `none defined` rather than naming a token invented
+  to fill the cell.
+- Edge case for a partial token set, and the README gains a matching FAQ answer
+  and a coverage line in the example summary.
+
 ## [1.2.0] - 2026-08-11
 
 - Every raw color now has a severity bucket. A literal on no interactive state

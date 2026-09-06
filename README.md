@@ -90,7 +90,7 @@ real client or a real repo.
 - Categories with a baseline: color, spacing, radius · no baseline: shadow, z-index
 - Raw colors outside tokens: 14
 - Off-scale spacing values: 9
-- Near-duplicate color pairs: 3
+- Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the raw-color rows)
 - Distinct font sizes in use: 12 (target: 8-10 or fewer)
 - Radius variants: 5 · Shadow variants: 4
 - Hardcoded z-index values: 7
@@ -107,7 +107,7 @@ real client or a real repo.
 | File:line | Value | Nearest token | Suggested fix |
 |---|---|---|---|
 | src/components/Card.tsx:15 | padding: 13px | --space-3 (12px) | round to nearest scale step |
-| src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted | no state, no theme - replace when the file is next touched |
+| src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted (#F8F8F8) | near-duplicate of the token - replace with var(--color-surface-muted); no state and no theme, so it can wait for the next touch |
 
 ## Consolidation plan
 1. Replace 3 raw #2563EB literals in Button.tsx with the existing primary token.
@@ -131,6 +131,11 @@ ahead of the rows shown.
   in the report is invented or estimated.
 - **Category by category.** Colors, spacing, near-duplicates, font sizes, radii, shadows, and
   z-index are scanned and reported separately, since each has a different fix and owner.
+- **One literal, one row.** A value can belong to two categories at once: a raw `#F7F7F7`
+  sitting next to a `--color-surface-muted: #F8F8F8` is both a raw-color finding and half a
+  near-duplicate pair. It still gets one row and one fix, because replacing the literal with
+  the token also ends the pair. The summary says how many pairs resolve that way and how many
+  are token-to-token, which is the only shape needing a merge of the token set itself.
 - **Severity by damage, not by count.** A single hardcoded color on a hover state outranks
   fifty off-scale spacing values, because the color bug is user-visible today.
 - **Renames are proposals, never actions.** If a token's name no longer matches how it is

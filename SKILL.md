@@ -86,7 +86,20 @@ lockfiles. For each category below, collect every match with its file and line n
 - **Near-duplicate colors.** Group all raw and token colors by hue (convert to HSL). Flag
   pairs within the same category (background, text, border) whose lightness differs by less
   than 5% or whose values differ by a handful of hex units - these are merge candidates, not
-  necessarily bugs.
+  necessarily bugs. Record what each side of the pair is, because that decides whether the
+  pair is a finding of its own or a property of one already open:
+  - **Token and token.** Neither side is drift, so nothing else in the report covers it.
+    This is the shape that earns its own P2 row, and its fix edits the token set - merge the
+    two, keep the better-named one, and propose the rename for the loser's call sites.
+  - **Literal and token.** The literal is already a raw-color finding, and the token it
+    nearly duplicates is the `Nearest token` for that row. Replacing the literal dissolves
+    the pair, so it does not open a second row - say `near-duplicate of the token` in the
+    existing row's fix instead.
+  - **Literal and literal.** If a color baseline exists, both sides are raw-color rows
+    pointing at the same nearest token, and the pair dissolves with them. If no color
+    baseline exists, neither side is drift against anything, and the pair is the whole
+    finding: one P2 row naming both locations, with the fix being to converge on one value
+    and define it as the token that was missing.
 - **Font-size sprawl.** Collect every distinct `font-size` value in the codebase, raw or
   token. More than 8-10 distinct sizes for a single product is sprawl - list every value with
   a count of how many places use it, sorted descending.
@@ -119,7 +132,7 @@ invent a location.
 - Categories with a baseline: <list> · no baseline: <list, or "none">
 - Raw colors outside tokens: <count>
 - Off-scale spacing values: <count>
-- Near-duplicate color pairs: <count>
+- Near-duplicate color pairs: <count> (<n> token-to-token, <m> dissolved by the raw-color rows)
 - Distinct font sizes in use: <count> (target: 8-10 or fewer)
 - Radius variants: <count> · Shadow variants: <count>
 - Hardcoded z-index values: <count>
@@ -161,10 +174,19 @@ without waiting for the others.
 Reconcile the summary against the tables before shipping the report. The summary carries two
 kinds of number, and only one of them is a row count:
 
-- **Drift counts** - raw colors, off-scale spacing, near-duplicate pairs, hardcoded z-index.
-  Each of these findings is a row in exactly one of the P0/P1/P2 tables, so the summary count
-  must equal the number of rows carrying that category across all three tables. A
-  near-duplicate pair is one finding on one row naming both locations, not two rows.
+- **Drift counts** - raw colors, off-scale spacing, hardcoded z-index. Each of these
+  findings is a row in exactly one of the P0/P1/P2 tables, so the summary count must equal
+  the number of rows carrying that category across all three tables.
+- **Near-duplicate pairs** are counted but not row-matched, and they are the one category
+  where a literal carries two categories at once: a raw `#F7F7F7` next to a
+  `--color-surface-muted: #F8F8F8` is both a raw-color finding and half a pair. Row-matching
+  it would put the same literal in two tables and bill the same fix twice, since replacing
+  the literal with the token also ends the pair; dropping the pair from the count instead
+  would hide a real observation. So state the count and its split, and let each pair land
+  where Step 2 puts it: `Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the
+  raw-color rows above)`. Only the pairs that opened their own row are rows, and the split is
+  what reconciles the number. A pair that does open a row is one row naming both locations,
+  never two.
 - **Inventory counts** - distinct font sizes in use, radius variants, shadow variants. These
   count distinct values in the codebase, most of which are not drift, so they never match a
   row count: a clean codebase with six tokenized font sizes reports 6 and opens no rows at

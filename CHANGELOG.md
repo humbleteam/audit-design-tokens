@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.0] - 2026-09-06
+
+- A literal that carries two drift categories now has a defined place in the
+  report. A raw `#F7F7F7` next to a `--color-surface-muted: #F8F8F8` is both a
+  raw-color finding and half a near-duplicate pair, and the reconciliation rule
+  demanded every drift finding be a row in exactly one severity table with the
+  summary count equal to the rows. One row left the pair count unreconciled; two
+  rows put the same literal in two tables and billed the same fix twice, since
+  replacing the literal with the token also ends the pair.
+- Near-duplicate pairs are now classified by what each side is. Token and token
+  is the only shape that earns its own row, and its fix edits the token set
+  rather than a call site. Literal and token dissolves into the raw-color row
+  that already names the token as its nearest. Literal and literal dissolves the
+  same way where a color baseline exists, and where none does it is the whole
+  finding, since neither side is drift against anything.
+- Near-duplicate pairs moved out of the row-matched drift counts into their own
+  reconciliation rule: the summary states the count and its split
+  (`3 (1 token-to-token, 2 dissolved by the raw-color rows above)`), which is
+  what makes the number check out without duplicating a row.
+- The README example carried the defect in miniature - a `#F7F7F7` row whose
+  nearest token was a near-duplicate of it, with neither the relationship nor
+  the shared fix stated. It now shows both, and the How-it-works list carries
+  the one-literal-one-row rule.
+
 ## [1.3.0] - 2026-08-18
 
 - Token discovery no longer misses most of the token set. The CSS custom-property

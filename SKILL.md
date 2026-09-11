@@ -52,6 +52,27 @@ color whatever it is called. A length whose name matches none of the three group
 recorded as spacing, the scale it most often belongs to, and named in the report as an
 assumption.
 
+**A token's value is scoped to a theme, so the record is `name -> value per theme`.** Step 1
+searches `:root`, `:host` and `[data-theme]` selectors, and a themed codebase defines the same
+name in more than one of them on purpose: `--color-surface` is `#FFFFFF` in the base block and
+`#111111` under `[data-theme="dark"]`. One name against one value keeps whichever block was
+read last and drops the rest of the palette, which is the half the report needs most, since P0
+is defined by what happens under an alternate theme. Treat the base block as the default theme,
+record each override under the selector carrying it, and list the themes found in the summary.
+Two things downstream depend on it:
+
+- **Nearest token is resolved inside one theme.** Compare a literal against the palette of the
+  theme its call site renders in - the theme selector it sits under, or the default theme when
+  it sits under none. A literal inside a dark block compared against the light palette comes
+  back with the token whose value is furthest from it, and the suggested fix then paints a dark
+  surface with a light one. Where a name exists in several themes, the `Nearest token` cell is
+  still just the name: `var(--color-surface)` is correct in every theme, which is the point of
+  the token.
+- **Near-duplicate pairs are found inside one theme.** Two values that never render together
+  are not a merge candidate. One name across two themes is never a pair - that is the token
+  doing its job - and two names that sit within 5% lightness in one theme but not in another
+  are a pair only in the theme where they collide, so the row names that theme.
+
 This list is the baseline every other file gets checked against. If more than one source
 exists (e.g. CSS variables AND a Tailwind config), treat both as valid tokens - report a
 value as drift only if it matches neither.
@@ -129,6 +150,7 @@ invent a location.
 
 ## Summary
 - Token sources found: <list, e.g. "CSS custom properties (32 tokens), tailwind.config.js theme (8 colors)">
+- Themes found: <list, e.g. "default (:root), [data-theme=dark]" - or "default only">
 - Categories with a baseline: <list> · no baseline: <list, or "none">
 - Raw colors outside tokens: <count>
 - Off-scale spacing values: <count>
@@ -253,6 +275,14 @@ say so plainly - "no P0 findings" is a valid and common result.
   the report, so a short report reads as limited coverage rather than a clean codebase. Do
   not stop the audit: the color half is real work, and the missing scales are worth naming
   as the gap they are.
+- **A themed codebase.** Several blocks define the same token names - `:root` plus
+  `[data-theme="dark"]`, or a light and a dark object in one theme file. That is the token set
+  working, not drift. Audit each theme against its own palette, report one set of findings with
+  the theme named on any row where it matters, and never propose merging two values that belong
+  to different themes. A name defined in the base block and missing from a theme override is
+  worth one line as a gap rather than a row as drift: it falls back to the base value, which is
+  how a dark mode ends up with one light surface, but nothing in the codebase bypassed a token,
+  so it opens no row and enters no count.
 - **Monorepo.** If the target path contains multiple `package.json` files with independent
   `src/` trees, ask which package to scan, or scan only the path the user named. Do not
   silently scan the whole monorepo - drift counts across unrelated apps are not comparable.

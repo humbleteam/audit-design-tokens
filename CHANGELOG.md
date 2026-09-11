@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.5.0] - 2026-09-11
+
+- A token's value is now recorded per theme. Step 1 has always searched `[data-theme]`
+  selectors alongside `:root`, and a themed codebase defines the same name in several of
+  them on purpose, but the record was `name -> value`: one slot per name, holding whichever
+  block was read last. Everything downstream then read a half-palette, and the half it lost
+  is the one P0 is defined by - a hardcoded color inside a component that renders under an
+  alternate theme.
+- Nearest token is resolved inside one theme. A literal is compared against the palette of
+  the theme its call site renders in - the selector it sits under, or the default theme when
+  it sits under none. Compared against the wrong palette, a `#111111` in a dark block returns
+  the token furthest from it, and the suggested fix paints a dark surface with a light one.
+- Near-duplicate pairs are found inside one theme, for the reason the pair rule already
+  implies: two values that never render together are not merge candidates. One name across
+  two themes is never a pair, and two names that collide in one theme and not in another are
+  a pair only in the theme where they collide, which the row now names. Without this, the
+  token-to-token shape - the one that earns its own row and whose fix edits the token set -
+  would propose merging a light token into a dark one.
+- Summary gains a `Themes found` line, so a report says which palettes it read. New edge
+  case for a themed codebase, including the token defined in the base block and missing from
+  an override: it falls back to the base value, which is how a dark mode ends up with one
+  light surface, but nothing bypassed a token, so it is named as a gap and opens no row.
+- README gains the matching FAQ answer and a How-it-works line.
+
 ## [1.4.0] - 2026-09-06
 
 - A literal that carries two drift categories now has a defined place in the

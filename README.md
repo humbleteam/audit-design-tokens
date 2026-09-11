@@ -87,6 +87,7 @@ real client or a real repo.
 
 ## Summary
 - Token sources found: CSS custom properties (22 tokens), tailwind.config.js theme (6 colors)
+- Themes found: default (:root), [data-theme=dark]
 - Categories with a baseline: color, spacing, radius · no baseline: shadow, z-index
 - Raw colors outside tokens: 14
 - Off-scale spacing values: 9
@@ -127,6 +128,11 @@ ahead of the rows shown.
   right categories instead of being missed and then counted as drift against themselves.
   Nothing counts as drift until there is a known-good value to drift from: a category with
   no tokens is reported as having no baseline, never as zero findings.
+- **One name, one value per theme.** A themed codebase defines `--color-surface` twice on
+  purpose - white in the base block, near-black under `[data-theme="dark"]` - so the token
+  record keeps both and says which theme each belongs to. Literals are matched against the
+  palette of the theme they render in, and two colors that never appear on screen together are
+  never proposed as a merge.
 - **File:line, not vibes.** Every finding traces to a real location the skill scanned. Nothing
   in the report is invented or estimated.
 - **Category by category.** Colors, spacing, near-duplicates, font sizes, radii, shadows, and
@@ -185,6 +191,16 @@ The same rule holds per category for radius, shadows, and type. Categories that 
 codebase against itself - font-size sprawl, radius and shadow counts, near-duplicate colors,
 ungoverned z-index - run either way, since they need no token to measure against. A partial
 token set is the normal starting shape, not a reason to refuse the audit.
+
+**Does this work with dark mode, or more than one theme?**
+Yes, and the theme is part of how a finding is read. Each theme's palette is recorded
+separately - the base `:root` block plus every `[data-theme]` override, or the light and dark
+objects in a theme file - and a raw literal is compared against the palette of the theme its
+call site renders in, so a literal inside a dark block is never matched to a light token whose
+value is the opposite of it. Near-duplicate pairs are found within one theme for the same
+reason: two values that never render together are not a merge candidate, and the same token
+name carrying a different value per theme is the token working, not drift. The summary lists
+the themes found, so a report from a themed codebase says which palettes it read.
 
 **Does this work with Tailwind?**
 Yes. It compares class usage against `tailwind.config.js`'s theme and treats

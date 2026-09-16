@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.6.0] - 2026-09-16
+
+- The README's example output is a complete report instead of an abridged one. It
+  carried a note saying the P2 table and the rename proposal were cut and that the
+  summary counts therefore ran ahead of the rows shown - which is the one thing the
+  reconciliation rule added in 1.4.0 forbids, demonstrated by the only rendered report
+  in the repo. Two shapes had never been shown anywhere as a result: the token-to-token
+  near-duplicate, which 1.4.0 named as the only pair that earns its own row and whose
+  fix edits the token set rather than a call site, and the rename proposal that pair
+  produces for the loser's call sites.
+- The example's counts now reconcile the way Step 3 asks. Drift counts equal their rows
+  (three raw colors, one off-scale value, three z-index literals), the pair count states
+  its split, and font size, radius and shadow are listed by value as inventory counts
+  that open no rows - the case Step 3 describes and nothing rendered.
+- The P2 rows also render two rules that existed only as prose: a `none defined` nearest
+  token where the category has no baseline, and the fix that follows from it, which is to
+  define the token rather than to name one that does not exist.
+
 ## [1.5.0] - 2026-09-11
 
 - A token's value is now recorded per theme. Step 1 has always searched `[data-theme]`

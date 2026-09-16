@@ -89,12 +89,12 @@ real client or a real repo.
 - Token sources found: CSS custom properties (22 tokens), tailwind.config.js theme (6 colors)
 - Themes found: default (:root), [data-theme=dark]
 - Categories with a baseline: color, spacing, radius · no baseline: shadow, z-index
-- Raw colors outside tokens: 14
-- Off-scale spacing values: 9
+- Raw colors outside tokens: 3
+- Off-scale spacing values: 1
 - Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the raw-color rows)
-- Distinct font sizes in use: 12 (target: 8-10 or fewer)
-- Radius variants: 5 · Shadow variants: 4
-- Hardcoded z-index values: 7
+- Distinct font sizes in use: 8 (12, 14, 16, 18, 20, 24, 30, 36px - target: 8-10 or fewer)
+- Radius variants: 3 (4, 8, 16px) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12))
+- Hardcoded z-index values: 3
 
 ## P0 - breaks theming
 
@@ -110,14 +110,38 @@ real client or a real repo.
 | src/components/Card.tsx:15 | padding: 13px | --space-3 (12px) | round to nearest scale step |
 | src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted (#F8F8F8) | near-duplicate of the token - replace with var(--color-surface-muted); no state and no theme, so it can wait for the next touch |
 
+## P2 - consolidation candidates
+
+| File:line | Value | Nearest token | Suggested fix |
+|---|---|---|---|
+| src/styles/tokens.css:11 + :12 | #F8F8F8 / #F9F9F9 | --color-surface-muted | token-to-token pair, 1 hex unit apart in the default theme - merge --color-surface-alt into --color-surface-muted, rename proposed below |
+| src/components/Modal.tsx:12 | z-index: 1000 | none defined | no z-index scale exists - define one and route this value through it |
+| src/components/Dropdown.tsx:31 | z-index: 9999 | none defined | same scale, one step below the modal |
+| src/components/Toast.tsx:7 | z-index: 10000 | none defined | same scale, top step |
+
+## Proposed renames (do not apply silently)
+--color-surface-alt -> --color-surface-muted (merged into the survivor by the P2 pair above,
+not a name that stopped matching its use). Call sites: src/components/Panel.tsx:18,
+src/components/Sidebar.tsx:44, src/marketing/Hero.tsx:7, src/styles/cards.css:22.
+
 ## Consolidation plan
-1. Replace 3 raw #2563EB literals in Button.tsx with the existing primary token.
-2. Replace the overlay rgba() literal in Modal.tsx with --color-overlay.
-3. Round the 9 off-scale spacing values to the nearest 4px step, one component at a time.
+1. Replace #2563EB in Button.tsx:42 with var(--color-primary).
+2. Replace the overlay rgba() literal in Modal.tsx:88 with var(--color-overlay).
+3. Replace #F7F7F7 in Banner.tsx:9 with var(--color-surface-muted) - it is half of both
+   dissolved pairs, so this ends them too.
+4. Round padding: 13px in Card.tsx:15 to var(--space-3).
+5. After the rename is approved, merge --color-surface-alt into --color-surface-muted across
+   its 4 call sites.
+6. Define a z-index scale and route the three literals through it.
 ```
 
-Abridged - the P2 table and the rename proposal are cut here, so the summary counts above run
-ahead of the rows shown.
+The report is complete as shown, and its numbers reconcile the way the skill requires: three
+raw colors and three raw-color rows, one off-scale value and one row, three z-index literals
+and three rows. The pair count is the exception that is counted but not row-matched - one
+token-to-token pair opens the P2 row, and the two the Banner literal is half of are fixed by
+replacing it, so they are named in the split instead of billed twice. Font sizes, radius and
+shadow are inventory counts: all three sit inside their thresholds, so they are listed by value
+and open no rows at all.
 
 ## How it works
 

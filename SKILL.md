@@ -105,10 +105,26 @@ lockfiles. For each category below, collect every match with its file and line n
   invented baseline the no-tokens stop rule exists to prevent, applied one category at a
   time instead of all at once.
 - **Near-duplicate colors.** Group all raw and token colors by hue (convert to HSL). Flag
-  pairs within the same category (background, text, border) whose lightness differs by less
-  than 5% or whose values differ by a handful of hex units - these are merge candidates, not
-  necessarily bugs. Record what each side of the pair is, because that decides whether the
-  pair is a finding of its own or a property of one already open:
+  pairs whose lightness differs by less than 5%, or whose values differ by a handful of hex
+  units, and which carry the same role - background, text, or border - since two close colors
+  doing different jobs are a contrast decision rather than a merge candidate. **Role is not
+  one of the Step 1 categories, and nothing before this point has recorded it, so derive it
+  per side.** A literal's role is the property of the declaration it sits on, which this walk
+  is already reading to get the line number: `background`/`background-color` is background,
+  `color` is text, `border-*` and `outline-*` are border, and the color ending a `box-shadow`
+  is shadow. A token's role is its call sites - the `var(--name)` occurrences the same walk
+  passes over - and its own name only where the name states the role outright
+  (`--color-bg-*`, `--text-*`, `--border-*`). Step 1 records `name -> value` and never visits
+  a call site, so a token whose name says nothing and which is referenced nowhere has no
+  derivable role at all, and that lands hardest on the pair that matters most: token and
+  token is the only shape that earns its own row, and it is the one shape where neither side
+  sits on a declaration to be read. **A pair with one or both roles underivable is still
+  reported, with the unknown side named in the fix cell and the fix asked as a question
+  rather than written as a merge.** Dropping it would have the gate discard exactly the
+  findings it exists to catch, and discard them silently - no count, no row, nothing
+  downstream showing that a pair was seen and set aside. Record what each side of the pair
+  is, because that decides whether the pair is a finding of its own or a property of one
+  already open:
   - **Token and token.** Neither side is drift, so nothing else in the report covers it.
     This is the shape that earns its own P2 row, and its fix edits the token set - merge the
     two, keep the better-named one, and propose the rename for the loser's call sites.

@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.7.0] - 2026-09-22
+
+- The near-duplicate gate says how a role is derived instead of assuming one exists. Step 2
+  flagged pairs "within the same category (background, text, border)", a classification
+  neither Step 1 nor Step 2 produces: Step 1's categories are the value-shape ones the
+  summary table is keyed by (color, spacing, font-size, radius, shadow, z-index), and nothing
+  anywhere recorded what a color is used for. The gate is now named as a role, so it no
+  longer collides with the Step 1 category it is not, and each side carries its own
+  derivation - a literal's role from the property of the declaration it sits on, which the
+  walk is already reading to get the line number, and a token's from its `var(--name)` call
+  sites, or from its name only where the name states the role outright.
+- The shape the rule could derive least is the shape it matters most for, and that is now
+  written down rather than left to fail quietly. Step 1 records `name -> value` and never
+  visits a call site, so a token that is referenced nowhere and named for nothing has no
+  derivable role - and token-to-token is the only pair that earns its own P2 row and the only
+  one where neither side sits on a declaration to be read.
+- A pair with one or both roles underivable is reported, with the unknown side named in the
+  fix cell and the fix asked as a question rather than written as a merge. Dropping it would
+  have the gate discard exactly the findings it exists to catch, with no count, no row and
+  nothing downstream showing that a pair had been seen and set aside.
+
 ## [1.6.0] - 2026-09-16
 
 - The README's example output is a complete report instead of an abridged one. It

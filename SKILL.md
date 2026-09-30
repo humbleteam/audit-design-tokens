@@ -229,7 +229,9 @@ kinds of number, and only one of them is a row count:
   count distinct values in the codebase, most of which are not drift, so they never match a
   row count: a clean codebase with six tokenized font sizes reports 6 and opens no rows at
   all. Reconcile them against the values instead - state the count, list the distinct values,
-  and open a P1 row only for what is past the threshold.
+  and open a P1 row only for what is past the threshold. That row is a shape the three
+  tables were not built for, since they are keyed by `File:line` and sprawl has no single
+  line - see the edge case below for how it is filled and why it stays one row.
 
 If a category has zero findings, keep its row in the summary showing 0 and omit its table.
 
@@ -315,6 +317,26 @@ say so plainly - "no P0 findings" is a valid and common result.
   consolidation plan, one line each with the reason, so every exclusion stays reviewable.
   If the user says one of them should be tokenized after all, move it back into the tables
   and update the summary counts.
+- **An inventory category past its threshold.** Thirteen font sizes where the target is
+  8-10, or six radius variants where the scale allows three or four. The finding is the
+  count, so it is one finding rather than one per value, and it has no single location: the
+  tables are keyed by `File:line` and the sizes are spread over every file that sets the
+  property. It opens exactly one P1 row for the category, and the two columns it cannot
+  fill say so rather than name one file and imply the rest are clean:
+
+  | File:line | Value | Nearest token | Suggested fix |
+  |---|---|---|---|
+  | font-size - no single location | 13 distinct sizes (target 8-10) | not applicable - the finding is the count, not a distance from a token | collapse to the scale, starting with the 5 sizes used once each |
+
+  `not applicable` is a different cell from the `none defined` above it: that one says the
+  category has no token to be nearest to, this one says nearest-token is the wrong question
+  for a finding about how many values exist. What Step 2 collected for the category goes
+  under the table as that row's evidence - for font size the counted list, one line per
+  value with its use count, sorted descending, because a row cannot hold thirteen values
+  and the summary line carries them without the counts; for radius and shadow the distinct
+  values, which the summary already lists. Reconciliation is unchanged: an inventory
+  category opens either no row or one row, never a row per value, so its summary number
+  stays a count of distinct values and is never matched against a row count.
 - **CSS-in-JS with computed values.** If a color or spacing value is computed at runtime
   (e.g. `darken(theme.primary, 0.1)`), do not flag it as raw - it already derives from a
   token. Only flag literals that do not reference any token.

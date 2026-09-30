@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.8.0] - 2026-09-30
+
+- An inventory finding past its threshold has a row it can actually be written in. Step 3
+  told the report to `open a P1 row only for what is past the threshold` while all three
+  tables are keyed by `File:line`, and font-size sprawl has no single line - the count is
+  spread over every file that sets the property. Two of the four columns had no legal
+  content either: `Value` because the finding is a set of thirteen sizes rather than one
+  value, and `Nearest token` because the finding is how many values exist, not how far one
+  sits from a token. The worked example in the README never reached the case, since all
+  three of its inventory categories sit inside their thresholds, so the shape existed
+  nowhere in the repo.
+- The case is now an edge case with the row rendered. One row per over-threshold category,
+  never one per value; the location cell says there is no single location; `Nearest token`
+  reads `not applicable` and the entry separates that from the `none defined` cell already
+  in Step 3, which answers a different question. The per-value list Step 2 collects goes
+  under the table as that row's evidence, and the reconciliation rule is unchanged - an
+  inventory category opens no row or one row, so its summary number is still a count of
+  distinct values and is never matched against rows.
+
 ## [1.7.0] - 2026-09-22
 
 - The near-duplicate gate says how a role is derived instead of assuming one exists. Step 2

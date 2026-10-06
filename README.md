@@ -93,7 +93,7 @@ real client or a real repo.
 - Off-scale spacing values: 1
 - Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the raw-color rows)
 - Distinct font sizes in use: 8 (12, 14, 16, 18, 20, 24, 30, 36px - target: 8-10 or fewer)
-- Radius variants: 3 (4, 8, 16px) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12))
+- Radius variants: 3 (4, 8, 16px - target: 3-4 or fewer) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12) - target: 3-4 or fewer)
 - Hardcoded z-index values: 3
 
 ## P0 - breaks theming
@@ -140,8 +140,8 @@ raw colors and three raw-color rows, one off-scale value and one row, three z-in
 and three rows. The pair count is the exception that is counted but not row-matched - one
 token-to-token pair opens the P2 row, and the two the Banner literal is half of are fixed by
 replacing it, so they are named in the split instead of billed twice. Font sizes, radius and
-shadow are inventory counts: all three sit inside their thresholds, so they are listed by value
-and open no rows at all.
+shadow are inventory counts: all three sit inside their thresholds, which the summary prints
+beside each count, so they are listed by value and open no rows at all.
 
 ## How it works
 

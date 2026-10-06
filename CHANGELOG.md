@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.9.0] - 2026-10-06
+
+- Every inventory count in the summary now carries the threshold that decides whether it is
+  a finding. `Distinct font sizes in use: <count> (target: 8-10 or fewer)` printed its
+  bound; `Radius variants: <count> · Shadow variants: <count>` printed none, although
+  Step 2 sets a line for both. So `Radius variants: 5` read as a fact rather than a finding,
+  and the one place a reader meets the number was the one place that could not say five is
+  over the line while two is fine.
+- The bound printed is the one that opens a row: 8-10 or fewer font sizes, 3-4 or fewer
+  radius and shadow variants. Step 2's tighter typical scale (`sm` / `md` / `lg` radius, 2-3
+  shadow depths) describes a considered scale rather than the accretion line, and printing
+  it instead would mark a clean four-step radius scale as over target.
+- Drift counts still carry no target, and the rule now says why: any value above zero is a
+  finding for raw colors, off-scale spacing and hardcoded z-index, so a target beside one of
+  those would read as a tolerance this skill does not grant. The distinction is inventory
+  against drift, not an oversight on two lines.
+- The bound is also what makes the summary reconcilable by eye against the P1 table. Since
+  1.8.0 an over-threshold inventory category opens exactly one P1 row, so a count above its
+  threshold with no row is a gap in the report - and without the bound on the line, that gap
+  looked exactly like a clean count.
+- The README's worked example and its closing paragraph moved with the shape: both radius
+  and shadow show their target, and the paragraph that explains why all three inventory
+  categories open no rows now points at the bounds the summary prints. No threshold changed,
+  no severity rule changed, and the reconciliation rule for inventory counts is unchanged -
+  a category still opens either no row or one row, never a row per value.
+
 ## [1.8.0] - 2026-09-30
 
 - An inventory finding past its threshold has a row it can actually be written in. Step 3

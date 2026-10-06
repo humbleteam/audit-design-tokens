@@ -172,7 +172,7 @@ invent a location.
 - Off-scale spacing values: <count>
 - Near-duplicate color pairs: <count> (<n> token-to-token, <m> dissolved by the raw-color rows)
 - Distinct font sizes in use: <count> (target: 8-10 or fewer)
-- Radius variants: <count> · Shadow variants: <count>
+- Radius variants: <count> (target: 3-4 or fewer) · Shadow variants: <count> (target: 3-4 or fewer)
 - Hardcoded z-index values: <count>
 
 ## P0 - breaks theming
@@ -232,6 +232,19 @@ kinds of number, and only one of them is a row count:
   and open a P1 row only for what is past the threshold. That row is a shape the three
   tables were not built for, since they are keyed by `File:line` and sprawl has no single
   line - see the edge case below for how it is filled and why it stays one row.
+
+  Each of the three carries its threshold on the summary line, because the count alone does
+  not say whether it is a finding: `Radius variants: 5` reads as a fact, and only the bound
+  makes it the same kind of statement as `Raw colors outside tokens: 5` one line above. The
+  bounds are Step 2's, and what the line prints is the one that opens a row - 8-10 or fewer
+  font sizes, 3-4 or fewer radius and shadow variants - not the tighter typical scale Step 2
+  also names (`sm` / `md` / `lg` radius, 2-3 shadow depths), which describes a considered
+  scale rather than the accretion line. The drift counts carry no target for the opposite
+  reason: any value above zero is a finding there, so a target beside one would read as a
+  tolerance this skill does not grant. The bound is also what makes the summary reconcilable
+  by eye against the P1 table, since an inventory count above its threshold with no row is a
+  gap in the report, and without the bound printed that gap looks exactly like a clean
+  count.
 
 If a category has zero findings, keep its row in the summary showing 0 and omit its table.
 

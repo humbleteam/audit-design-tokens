@@ -231,7 +231,8 @@ kinds of number, and only one of them is a row count:
   all. Reconcile them against the values instead - state the count, list the distinct values,
   and open a P1 row only for what is past the threshold. That row is a shape the three
   tables were not built for, since they are keyed by `File:line` and sprawl has no single
-  line - see the edge case below for how it is filled and why it stays one row.
+  line - see the edge case below for how it is filled, why it stays one row, and why that
+  one row is the only finding whose consolidation plan runs to several steps.
 
   Each of the three carries its threshold on the summary line, because the count alone does
   not say whether it is a finding: `Radius variants: 5` reads as a fact, and only the bound
@@ -350,6 +351,25 @@ say so plainly - "no P0 findings" is a valid and common result.
   values, which the summary already lists. Reconciliation is unchanged: an inventory
   category opens either no row or one row, never a row per value, so its summary number
   stays a count of distinct values and is never matched against a row count.
+
+  In the consolidation plan this row is the one finding that becomes more than one step,
+  and a row and a step are not the same unit. The row is the finding, and it stays single
+  because the summary count reconciles against it. The plan is a work order, and the
+  plan's two properties are both false of this fix as the row states it: collapsing
+  thirteen font sizes touches every file that sets the property, which is the giant sweep
+  the smallest-diff-first order exists to avoid, and it does not ship without waiting for
+  anything. So the plan carries one step per value retired - the call sites of one
+  off-scale value moved onto the nearest step of the scale - which is PR-sized and
+  independent like every other step. The steps come off the evidence already under the
+  table and are never invented: for font size the counted list says which values are
+  cheapest to retire, the ones used once or twice, and for radius and shadow, where use
+  counts were not collected, the step names the variant it retires. Each step then takes
+  its own place in the order by its own size rather than sitting as a block at the end, so
+  an inventory finding and a single literal replacement interleave. The steps stop when
+  the count is back inside the bound that opened the row, since that bound is what made it
+  a finding - thirteen sizes against a target of 8-10 is three steps to reach ten and five
+  to reach eight, not thirteen - and the plan names the values it kept so a reader is not
+  left wondering which of the thirteen are still there.
 - **CSS-in-JS with computed values.** If a color or spacing value is computed at runtime
   (e.g. `darken(theme.primary, 0.1)`), do not flag it as raw - it already derives from a
   token. Only flag literals that do not reference any token.

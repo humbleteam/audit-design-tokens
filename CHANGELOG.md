@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.10.0] - 2026-10-13
+
+- An inventory finding now has a stated place and shape in the consolidation plan. The
+  plan is declared ordered smallest-diff-first with each step a single PR-sized change
+  that ships without waiting for the others, and since 1.9.0 an inventory category past
+  its threshold opens exactly one P1 row whose fix is to collapse the values to the scale.
+  That fix has neither property: collapsing thirteen font sizes touches every file that
+  sets the property, which is the giant sweep the order exists to avoid, and the plan said
+  nothing about where such a step goes or whether it may be split. The row and the plan
+  step are now stated as different units. The row stays single, because the summary count
+  reconciles against it, and the plan carries one step per value retired - the call sites
+  of one off-scale value moved onto the nearest step of the scale, which is PR-sized and
+  independent like every other step. The steps are read off the evidence already under the
+  row and are never invented: the counted list names the values cheapest to retire for
+  font size, and for radius and shadow, which carry no use counts, the step names the
+  variant it retires. Each step takes its own place in the order by its own size instead
+  of sitting as a block at the end, and the steps stop once the count is back inside the
+  bound that opened the row, so thirteen sizes against a target of 8-10 is three steps to
+  reach ten and five to reach eight, not thirteen, with the kept values named. The output template is unchanged,
+  because the template's claim about a step was never the false one. The README's
+  smallest-diff-first bullet carries the split. Why it stayed invisible: all three
+  inventory counts in the worked example sit inside their thresholds, so the one report
+  anyone copies opens no inventory row and its plan never meets the case.
+
 ## [1.9.0] - 2026-10-06
 
 - Every inventory count in the summary now carries the threshold that decides whether it is

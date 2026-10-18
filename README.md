@@ -42,7 +42,10 @@ file:line for each finding and a smallest-diff-first plan to fix it.
 - Groups near-duplicate colors by hue and lightness so you can see merge candidates at a
   glance instead of hunting for them by eye.
 - Counts distinct font sizes, radius values, shadow depths, and raw `z-index` numbers -
-  sprawl in any of those is as real a drift signal as color.
+  sprawl in any of those is as real a drift signal as color. Each count prints the one
+  number that opens a finding beside it - 10 font sizes, 4 radius variants, 3 shadow
+  depths - so a count on the summary line reads as clean or as a finding without a second
+  trip into the rules.
 - Ranks every finding P0 (breaks theming), P1 (scale drift), or P2 (consolidation candidate)
   and ends with an ordered, independently shippable fix plan.
 
@@ -92,8 +95,8 @@ real client or a real repo.
 - Raw colors outside tokens: 3
 - Off-scale spacing values: 1
 - Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the raw-color rows)
-- Distinct font sizes in use: 8 (12, 14, 16, 18, 20, 24, 30, 36px - target: 8-10 or fewer)
-- Radius variants: 3 (4, 8, 16px - target: 3-4 or fewer) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12) - target: 3-4 or fewer)
+- Distinct font sizes in use: 8 (12, 14, 16, 18, 20, 24, 30, 36px - target: 10 or fewer)
+- Radius variants: 3 (4, 8, 16px - target: 4 or fewer) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12) - target: 3 or fewer)
 - Hardcoded z-index values: 3
 
 ## P0 - breaks theming
@@ -218,6 +221,16 @@ The same rule holds per category for radius, shadows, and type. Categories that 
 codebase against itself - font-size sprawl, radius and shadow counts, near-duplicate colors,
 ungoverned z-index - run either way, since they need no token to measure against. A partial
 token set is the normal starting shape, not a reason to refuse the audit.
+
+**Why does radius get four variants and shadow only three?**
+Because a pill or fully-rounded radius - `9999px`, `50%` - is a shape rather than a fourth
+step on the ramp. It does not interpolate with `sm`/`md`/`lg`, and a product reaches it on
+purpose, so a fourth radius value is not evidence of accretion. Shadow has no equivalent:
+every `box-shadow` value is a point on one elevation ramp, so a fourth depth is already past
+the 2-3 a considered scale uses. Each count prints the bound that applies to it, as one
+number rather than a range - a range never says which count opens the row, and one bound
+shared by two scales of different sizes leaves the fourth shadow depth above every scale the
+skill names and inside the printed target.
 
 **Does this work with dark mode, or more than one theme?**
 Yes, and the theme is part of how a finding is read. Each theme's palette is recorded

@@ -138,11 +138,18 @@ lockfiles. For each category below, collect every match with its file and line n
     finding: one P2 row naming both locations, with the fix being to converge on one value
     and define it as the token that was missing.
 - **Font-size sprawl.** Collect every distinct `font-size` value in the codebase, raw or
-  token. More than 8-10 distinct sizes for a single product is sprawl - list every value with
-  a count of how many places use it, sorted descending.
-- **Radius and shadow variants beyond 3 levels.** Most products need at most `sm` / `md` /
+  token. A single product's considered scale is 8-10 distinct sizes, and **a row opens at
+  11** - list every value with a count of how many places use it, sorted descending.
+- **Radius and shadow variants past their scale.** Most products need at most `sm` / `md` /
   `lg` radius and 2-3 shadow depths. Count distinct `border-radius` and `box-shadow` values
-  actually in use; anything past 3-4 is a sign of accretion, not a considered scale.
+  actually in use. The two categories open a row at different counts, because their scales
+  are different sizes and one of them has a legitimate fourth value: **a row opens at 5
+  distinct radius values, and at 4 distinct shadow values.** Radius gets the extra step
+  because a pill or fully-rounded value - `9999px`, `50%` - is a shape rather than a fourth
+  point on the ramp: it does not interpolate with `sm`/`md`/`lg` and a product reaches it
+  deliberately, not by accretion. Nothing plays that role for shadow, where every value is a
+  point on one elevation ramp, so a fourth depth is already past the scale. A count below
+  the bound is reported and opens nothing.
 - **Hardcoded z-index stacks.** Any numeric `z-index` value not pulled from a token or a
   shared constant. Collect all of them sorted by value - an ungoverned z-index list is a
   common source of stacking bugs even when nothing else in the design system has drifted.
@@ -171,8 +178,8 @@ invent a location.
 - Raw colors outside tokens: <count>
 - Off-scale spacing values: <count>
 - Near-duplicate color pairs: <count> (<n> token-to-token, <m> dissolved by the raw-color rows)
-- Distinct font sizes in use: <count> (target: 8-10 or fewer)
-- Radius variants: <count> (target: 3-4 or fewer) · Shadow variants: <count> (target: 3-4 or fewer)
+- Distinct font sizes in use: <count> (target: 10 or fewer)
+- Radius variants: <count> (target: 4 or fewer) · Shadow variants: <count> (target: 3 or fewer)
 - Hardcoded z-index values: <count>
 
 ## P0 - breaks theming
@@ -237,10 +244,16 @@ kinds of number, and only one of them is a row count:
   Each of the three carries its threshold on the summary line, because the count alone does
   not say whether it is a finding: `Radius variants: 5` reads as a fact, and only the bound
   makes it the same kind of statement as `Raw colors outside tokens: 5` one line above. The
-  bounds are Step 2's, and what the line prints is the one that opens a row - 8-10 or fewer
-  font sizes, 3-4 or fewer radius and shadow variants - not the tighter typical scale Step 2
-  also names (`sm` / `md` / `lg` radius, 2-3 shadow depths), which describes a considered
-  scale rather than the accretion line. The drift counts carry no target for the opposite
+  bounds are Step 2's, and what the line prints is the one that opens a row - 10 or fewer
+  font sizes, 4 or fewer radius variants, 3 or fewer shadow variants - not the typical scale
+  Step 2 also names (8-10 sizes, `sm` / `md` / `lg` radius, 2-3 shadow depths), which
+  describes a considered scale rather than the accretion line. Each printed bound is one
+  number, and radius and shadow print different ones. A range cannot be a threshold - `3-4
+  or fewer` never said whether a fourth value opens a row - and one bound shared by two
+  categories whose scales differ in size leaves a band between them that nothing describes:
+  a fourth shadow depth was above everything Step 2 calls a considered scale and inside the
+  printed target, so it was neither clean nor a finding. The drift counts carry no target
+  for the opposite
   reason: any value above zero is a finding there, so a target beside one would read as a
   tolerance this skill does not grant. The bound is also what makes the summary reconcilable
   by eye against the P1 table, since an inventory count above its threshold with no row is a
@@ -264,8 +277,8 @@ never a token name invented to fill the column.
 - **P0**: a hardcoded color sits on an interactive state (hover/focus/active/disabled) or
   inside a component that also renders under a dark-mode or alternate-theme selector
   elsewhere in the codebase. This is the category that visibly breaks for users.
-- **P1**: off-scale spacing, font-size sprawl past 8-10 sizes, radius/shadow variants past
-  3-4 levels, and any raw color that meets neither P0 condition (see the default below).
+- **P1**: off-scale spacing, font-size sprawl past 10 sizes, radius past 4 variants, shadow
+  past 3, and any raw color that meets neither P0 condition (see the default below).
   Does not break anything today but actively degrades consistency.
 - **P2**: near-duplicate colors, isolated z-index literals, anything a reasonable team could
   ship as-is and clean up opportunistically.
@@ -331,8 +344,9 @@ say so plainly - "no P0 findings" is a valid and common result.
   consolidation plan, one line each with the reason, so every exclusion stays reviewable.
   If the user says one of them should be tokenized after all, move it back into the tables
   and update the summary counts.
-- **An inventory category past its threshold.** Thirteen font sizes where the target is
-  8-10, or six radius variants where the scale allows three or four. The finding is the
+- **An inventory category past its threshold.** Thirteen font sizes where the bound is 10,
+  six radius variants where the bound is 4, or four shadow depths where the bound is 3 and
+  the scale is 2-3. The finding is the
   count, so it is one finding rather than one per value, and it has no single location: the
   tables are keyed by `File:line` and the sizes are spread over every file that sets the
   property. It opens exactly one P1 row for the category, and the two columns it cannot
@@ -340,7 +354,7 @@ say so plainly - "no P0 findings" is a valid and common result.
 
   | File:line | Value | Nearest token | Suggested fix |
   |---|---|---|---|
-  | font-size - no single location | 13 distinct sizes (target 8-10) | not applicable - the finding is the count, not a distance from a token | collapse to the scale, starting with the 5 sizes used once each |
+  | font-size - no single location | 13 distinct sizes (target 10) | not applicable - the finding is the count, not a distance from a token | collapse to the scale, starting with the 5 sizes used once each |
 
   `not applicable` is a different cell from the `none defined` above it: that one says the
   category has no token to be nearest to, this one says nearest-token is the wrong question
@@ -367,9 +381,10 @@ say so plainly - "no P0 findings" is a valid and common result.
   its own place in the order by its own size rather than sitting as a block at the end, so
   an inventory finding and a single literal replacement interleave. The steps stop when
   the count is back inside the bound that opened the row, since that bound is what made it
-  a finding - thirteen sizes against a target of 8-10 is three steps to reach ten and five
-  to reach eight, not thirteen - and the plan names the values it kept so a reader is not
-  left wondering which of the thirteen are still there.
+  a finding - thirteen sizes against a bound of 10 is three steps, not thirteen, and going
+  on to eight is the considered scale rather than the finding, so it is offered and not
+  assumed - and the plan names the values it kept so a reader is not left wondering which
+  of the thirteen are still there.
 - **CSS-in-JS with computed values.** If a color or spacing value is computed at runtime
   (e.g. `darken(theme.primary, 0.1)`), do not flag it as raw - it already derives from a
   token. Only flag literals that do not reference any token.

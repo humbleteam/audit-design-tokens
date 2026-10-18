@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.11.0] - 2026-10-18
+
+- Radius and shadow shared one printed bound, `3-4 or fewer`, while Step 2's considered scale differs between them - `sm`/`md`/`lg` radius against 2-3 shadow depths. A fourth shadow depth therefore sat above every scale the skill names and inside the printed target, which is neither clean nor a finding, and nothing described the band. Deferred twice before this run.
+- A range cannot be a threshold either. `3-4 or fewer` never said whether a fourth value opens a row, and 1.10.0 had just made the printed bound load-bearing: it is what lets a reader reconcile the summary against the P1 table by eye, since an inventory count above its threshold with no row is a gap in the report. A bound that does not resolve to one number cannot do that job.
+- Each inventory category now prints the one count that opens a row: **11 font sizes, 5 radius variants, 4 shadow variants**, stated on the summary line as `target: 10 or fewer`, `4 or fewer` and `3 or fewer`. The numbers are derived, not picked. Radius gets the extra step over its three-step scale because a pill or fully-rounded value - `9999px`, `50%` - is a shape rather than a fourth point on the ramp: it does not interpolate with `sm`/`md`/`lg` and a product reaches it deliberately. Nothing plays that role for shadow, where every value is a point on one elevation ramp, so a fourth depth is already past the scale.
+- The behaviour change is shadow at four depths, which now opens a P1 row where it did not, in the direction Step 2's own prose always pointed. Radius at four and font size at ten are unchanged - the old range already admitted them.
+- The considered scale and the accretion line are kept as two different numbers doing two different jobs, which is 1.10.0's distinction and the reason the bound is printed at all. The consolidation plan stops at the bound that opened the row, so thirteen font sizes is three steps to ten rather than five to eight; going on to the scale is offered and never assumed.
+- Step 2's bullet heading said "beyond 3 levels", a third number against the body's "past 3-4" and the scale's `sm`/`md`/`lg` plus 2-3. It is now "past their scale", with both bounds stated in the body.
+- Carried to the severity rules, the inventory edge case and its worked row, the README summary, a how-it-works bullet and a new FAQ answer on why the two bounds differ. The README worked example reports 8 font sizes, 3 radius variants and 2 shadow depths, all inside the new bounds, so it still opens no inventory row and needed no other change - checked rather than assumed, since the shadow bound moved.
+- Seen and not taken: the inventory edge case's `Suggested fix` cell still reads "collapse to the scale, starting with the 5 sizes used once each", which previews the work order the plan owns, so the cell and the plan state the same work and only one of them is the work order; deferred twice now.
+
 ## [1.10.0] - 2026-10-13
 
 - An inventory finding now has a stated place and shape in the consolidation plan. The

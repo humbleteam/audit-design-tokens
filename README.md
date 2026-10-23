@@ -176,7 +176,7 @@ beside each count, so they are listed by value and open no rows at all.
 - **Smallest diff first.** The consolidation plan orders fixes so each one ships as its own
   small, reviewable change, not one giant sweep across the codebase. The one finding whose
   fix is a sweep by nature - an inventory count past its threshold, thirteen font sizes
-  where the target is 8-10 - is split into a step per value retired rather than exempted
+  where the bound is 10 - is split into a step per value retired rather than exempted
   from the rule, and the steps stop once the count is back inside the bound.
 
 ## How is this different from just asking the model?

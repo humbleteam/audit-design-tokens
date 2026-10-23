@@ -354,7 +354,7 @@ say so plainly - "no P0 findings" is a valid and common result.
 
   | File:line | Value | Nearest token | Suggested fix |
   |---|---|---|---|
-  | font-size - no single location | 13 distinct sizes (target 10) | not applicable - the finding is the count, not a distance from a token | collapse to the scale, starting with the 5 sizes used once each |
+  | font-size - no single location | 13 distinct sizes (target 10) | not applicable - the finding is the count, not a distance from a token | retire 3 values to bring the count inside the bound - the consolidation plan carries the order |
 
   `not applicable` is a different cell from the `none defined` above it: that one says the
   category has no token to be nearest to, this one says nearest-token is the wrong question
@@ -368,11 +368,13 @@ say so plainly - "no P0 findings" is a valid and common result.
 
   In the consolidation plan this row is the one finding that becomes more than one step,
   and a row and a step are not the same unit. The row is the finding, and it stays single
-  because the summary count reconciles against it. The plan is a work order, and the
-  plan's two properties are both false of this fix as the row states it: collapsing
-  thirteen font sizes touches every file that sets the property, which is the giant sweep
-  the smallest-diff-first order exists to avoid, and it does not ship without waiting for
-  anything. So the plan carries one step per value retired - the call sites of one
+  because the summary count reconciles against it. The plan is a work order and the
+  row's cell is not: the cell names what closing the finding means, the count back inside
+  the bound, and leaves which values go first to the plan. Taken as one move the fix has
+  neither property the plan requires - retiring three font sizes at once touches every
+  file that sets the property, which is the giant sweep the smallest-diff-first order
+  exists to avoid, and it does not ship without waiting for anything. So the plan carries
+  one step per value retired - the call sites of one
   off-scale value moved onto the nearest step of the scale - which is PR-sized and
   independent like every other step. The steps come off the evidence already under the
   table and are never invented: for font size the counted list says which values are

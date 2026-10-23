@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.12.0] - 2026-10-23
+
+- The inventory edge case's `Suggested fix` cell read "collapse to the scale, starting with the 5 sizes used once each". That is a work order: it names a sequence and the batch that goes first. Deferred on 10-13 and again on 10-18, taken today.
+- The cell stated the job the plan owns. 1.10.0 settled that a row and a step are different units - the row is the finding and stays single because the summary count reconciles against it, the plan is the work order - and the paragraph under the table derived that split by pointing at this cell as the thing the plan cannot ship. The repo was arguing against its own rendered row.
+- It also stated the superseded arithmetic. 1.11.0 made the printed bound the one number that opens a row and kept the considered scale separate from it, so thirteen font sizes is three steps to ten. "Collapse to the scale, starting with the 5 sizes used once each" is five steps to eight, left standing in the single place a reader sees the finding rendered.
+- The cell now reads `retire 3 values to bring the count inside the bound - the consolidation plan carries the order`. It names what closing the finding means and nothing about which value goes first.
+- The paragraph below follows the cell. The fix taken as one move is still the sweep the smallest-diff-first order exists to break up, which is the derivation it always made - now made about the fix rather than about the repo's own wording.
+- Carried to the README's smallest-diff-first bullet, which called 8-10 the target while the sentence beside it said the steps stop at the bound. It names the bound, 10. Same conflation, one line further out.
+- Nothing else moved: the row stays single, the summary count still reconciles against it, the evidence under the table is unchanged, and the counted list stays the plan's basis for retiring the cheap values first. The README worked example reports 8 font sizes, 3 radius variants and 2 shadow depths, all inside their bounds, so it opens no inventory row and needed no change - read again rather than taken from the last run's note.
+- Seen and not taken, for the next run on this repo: the three z-index literals in the worked example open three P2 rows whose fix cells read "no z-index scale exists - define one and route this value through it", "same scale, one step below the modal" and "same scale, top step", against one plan step that defines the scale and routes all three. Rows two and three cannot be applied on their own - they reference a scale row one proposes - so one finding is split across three rows, which is the mirror of the inventory case where one finding stays one row.
+
 ## [1.11.0] - 2026-10-18
 
 - Radius and shadow shared one printed bound, `3-4 or fewer`, while Step 2's considered scale differs between them - `sm`/`md`/`lg` radius against 2-3 shadow depths. A fourth shadow depth therefore sat above every scale the skill names and inside the printed target, which is neither clean nor a finding, and nothing described the band. Deferred twice before this run.

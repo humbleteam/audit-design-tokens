@@ -272,6 +272,16 @@ goes for the `Nearest token` column - where no token of that category exists the
 nearest one, so the cell says `none defined` and the suggested fix is to define the token,
 never a token name invented to fill the column.
 
+Every `Suggested fix` cell reads on its own. The three tables are sorted by severity, and a
+reader arrives at one row from a `File:line` match in their own diff or from a summary count
+being reconciled, so a cell leaning on a proposal made in a row above it is a fix nobody at
+that row can apply. Where several literals of a no-baseline category close against one scale
+the plan has to define, each row carries the shared condition and its own place in that
+scale: the rows hold the values the scale is built from, so the order is theirs to state, and
+the plan's step is the single move that defines the scale and routes all of them. The cell
+says what closing that row means, never which step runs first - that order is the
+consolidation plan's.
+
 ## Severity rules
 
 - **P0**: a hardcoded color sits on an interactive state (hover/focus/active/disabled) or

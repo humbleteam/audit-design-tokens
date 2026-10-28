@@ -118,9 +118,9 @@ real client or a real repo.
 | File:line | Value | Nearest token | Suggested fix |
 |---|---|---|---|
 | src/styles/tokens.css:11 + :12 | #F8F8F8 / #F9F9F9 | --color-surface-muted | token-to-token pair, 1 hex unit apart in the default theme - merge --color-surface-alt into --color-surface-muted, rename proposed below |
-| src/components/Modal.tsx:12 | z-index: 1000 | none defined | no z-index scale exists - define one and route this value through it |
-| src/components/Dropdown.tsx:31 | z-index: 9999 | none defined | same scale, one step below the modal |
-| src/components/Toast.tsx:7 | z-index: 10000 | none defined | same scale, top step |
+| src/components/Modal.tsx:12 | z-index: 1000 | none defined | no z-index scale exists - route this value through the one the plan defines: the bottom of its three steps |
+| src/components/Dropdown.tsx:31 | z-index: 9999 | none defined | no z-index scale exists - route this value through the one the plan defines: the middle step, above the modal |
+| src/components/Toast.tsx:7 | z-index: 10000 | none defined | no z-index scale exists - route this value through the one the plan defines: the top step, above the dropdown |
 
 ## Proposed renames (do not apply silently)
 --color-surface-alt -> --color-surface-muted (merged into the survivor by the P2 pair above,
@@ -169,6 +169,11 @@ beside each count, so they are listed by value and open no rows at all.
   near-duplicate pair. It still gets one row and one fix, because replacing the literal with
   the token also ends the pair. The summary says how many pairs resolve that way and how many
   are token-to-token, which is the only shape needing a merge of the token set itself.
+- **Every fix cell reads alone.** The tables are sorted by severity and a reader lands on one
+  row from a `File:line` match in their own diff, so no cell leans on a proposal made in a row
+  above it. Where several literals close against one scale that does not exist yet, each row
+  states the condition and its own step in that scale, and the consolidation plan carries the
+  single move that defines the scale and routes them all.
 - **Severity by damage, not by count.** A single hardcoded color on a hover state outranks
   fifty off-scale spacing values, because the color bug is user-visible today.
 - **Renames are proposals, never actions.** If a token's name no longer matches how it is

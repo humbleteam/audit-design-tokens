@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.13.0] - 2026-10-28
+
+- The three z-index rows in the README's worked example carried fix cells reading "no z-index scale exists - define one and route this value through it", "same scale, one step below the modal" and "same scale, top step". Rows two and three named no scale of their own and could not be applied by anyone who arrived at them first. Logged on 10-23 and taken today.
+- The 10-23 note read the defect as one finding split across three rows, the mirror of the inventory case. It is not that: the drift-count rule makes every raw color, off-scale value and z-index literal a row in exactly one table, so the summary's `Hardcoded z-index values: 3` reconciles against three rows and the unit here really is the literal. The rows stay three; what was wrong was inside the cells.
+- A cell cannot lean on a row above it. The tables are sorted by severity, and the two ways a reader reaches a single row - a `File:line` match in their own diff, or a summary count being reconciled - both land on one row with no reason to have read another. "Same scale" named a scale that only row one proposed.
+- Reading the rows together surfaced a second defect in the same cells: 9999 sits above 1000, so the dropdown is one step above the modal and not below it, and the toast at 10000 is above the dropdown. Step 2 collects z-index literals sorted by value, which is the order the table already printed them in, and the cells described the opposite stack.
+- Each cell now states the shared condition, the scale the plan defines, and its own place in it: the bottom of the three steps for the modal, the middle step above the modal for the dropdown, the top step above the dropdown for the toast. The plan's single step still defines the scale and routes all three, because the scale has to exist before any literal can move.
+- Step 3 gains the rule the cells were missing: every `Suggested fix` cell reads on its own, and where several literals of a no-baseline category close against one scale the plan has to define, each row carries the shared condition and its own place in that scale while the plan's step carries the move. Ordering is the rows' to state, since they hold the values the scale is built from, and which step runs first is the plan's.
+- Carried to the README's how-it-works list as a bullet beside "One literal, one row", which was the nearest statement about what a row owns and said nothing about reading one alone.
+- Nothing else moved: the summary counts, the evidence, the severity of the z-index rows and the consolidation plan are unchanged.
+- Seen and not taken, for the next run on this repo: Step 3 says the consolidation plan is ordered smallest-diff-first and that each step ships independently without waiting for the others, and step 5 of the worked plan opens with "After the rename is approved" - a wait on a proposal the report itself files for approval. Waiting on a human decision may well be the one dependency a step is allowed, but the rule as written draws no such line.
+
 ## [1.12.0] - 2026-10-23
 
 - The inventory edge case's `Suggested fix` cell read "collapse to the scale, starting with the 5 sizes used once each". That is a work order: it names a sequence and the batch that goes first. Deferred on 10-13 and again on 10-18, taken today.

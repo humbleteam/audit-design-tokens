@@ -209,7 +209,10 @@ this is a proposal for the user to approve.
 
 ## Consolidation plan
 Ordered, smallest-diff-first. Each step is a single PR-sized change that ships independently
-without waiting for the others.
+without waiting for the others. A step that applies a rename from the proposed-renames section
+carries the one precondition a step may carry: it waits on the user's approval of that
+proposal, never on another step. Such a step names the gate in its own line, keeps the place
+its size earns it, and leaves every other step shippable whether the approval arrives or not.
 
 1. <one file or one component, e.g. "Replace 6 raw #2563EB literals in src/Button.tsx and src/Link.tsx with var(--color-primary)">
 2. <next smallest step>

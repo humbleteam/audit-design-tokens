@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.14.0] - 2026-11-06
+
+- Step 3 promised that every consolidation-plan step "ships independently without waiting for the others", and step 5 of the README's worked plan opens with "After the rename is approved" - the one step in the skill's own example that carries a precondition, with no rule anywhere behind it. The item the 10-28 run logged as seen and not taken.
+- Read closely the example never broke the letter of the rule, which is why this is a silence and not a false statement: step 5 waits on the user's approval of the proposed-renames section, not on steps 1 to 4, and "the others" are the other steps. But the rule is the only thing a reader has when deciding whether a gated step may be written at all, and it answered a question one step away from the one they are asking. A reader applying it literally either drops the gate, which makes the plan apply a rename the report is forbidden to apply silently, or moves the step to the end of the plan, which breaks the smallest-diff-first order the same rule sets.
+- Step 3 now states the case: a step applying a rename from the proposed-renames section carries the one precondition a step may carry, it waits on the user's approval of that proposal and never on another step, and it names the gate in its own line, keeps the place its size earns it, and leaves every other step shippable whether the approval arrives or not.
+- Nothing in the worked example changes. Step 5 already names its gate inline and already sits where its size puts it, so the example becomes an instance of a stated rule rather than the exception to one. The rule also reads with the `## Rules` entry that renames are always a separate proposed section the user reviews before applying, and with the ordering rule that each step takes its place by its own size rather than sitting as a block at the end.
+- Seen and not taken, for the next run on this repo: the proposed-renames template opens "Only if a token's current name no longer matches its use", and the README's worked rename says in its own parenthesis that it is "not a name that stopped matching its use" - a merge into the surviving token of a near-duplicate pair. The template's "only if" excludes the one rename the repo demonstrates.
+
 ## [1.13.0] - 2026-10-28
 
 - The three z-index rows in the README's worked example carried fix cells reading "no z-index scale exists - define one and route this value through it", "same scale, one step below the modal" and "same scale, top step". Rows two and three named no scale of their own and could not be applied by anyone who arrived at them first. Logged on 10-23 and taken today.

@@ -42,10 +42,7 @@ file:line for each finding and a smallest-diff-first plan to fix it.
 - Groups near-duplicate colors by hue and lightness so you can see merge candidates at a
   glance instead of hunting for them by eye.
 - Counts distinct font sizes, radius values, shadow depths, and raw `z-index` numbers -
-  sprawl in any of those is as real a drift signal as color. Each count prints the one
-  number that opens a finding beside it - 10 font sizes, 4 radius variants, 3 shadow
-  depths - so a count on the summary line reads as clean or as a finding without a second
-  trip into the rules.
+  sprawl in any of those is as real a drift signal as color.
 - Ranks every finding P0 (breaks theming), P1 (scale drift), or P2 (consolidation candidate)
   and ends with an ordered, independently shippable fix plan.
 
@@ -90,14 +87,13 @@ real client or a real repo.
 
 ## Summary
 - Token sources found: CSS custom properties (22 tokens), tailwind.config.js theme (6 colors)
-- Themes found: default (:root), [data-theme=dark]
 - Categories with a baseline: color, spacing, radius · no baseline: shadow, z-index
-- Raw colors outside tokens: 3
-- Off-scale spacing values: 1
-- Near-duplicate color pairs: 3 (1 token-to-token, 2 dissolved by the raw-color rows)
-- Distinct font sizes in use: 8 (12, 14, 16, 18, 20, 24, 30, 36px - target: 10 or fewer)
-- Radius variants: 3 (4, 8, 16px - target: 4 or fewer) · Shadow variants: 2 (0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.12) - target: 3 or fewer)
-- Hardcoded z-index values: 3
+- Raw colors outside tokens: 14
+- Off-scale spacing values: 9
+- Near-duplicate color pairs: 3
+- Distinct font sizes in use: 12 (target: 8-10 or fewer)
+- Radius variants: 5 · Shadow variants: 4
+- Hardcoded z-index values: 7
 
 ## P0 - breaks theming
 
@@ -111,40 +107,16 @@ real client or a real repo.
 | File:line | Value | Nearest token | Suggested fix |
 |---|---|---|---|
 | src/components/Card.tsx:15 | padding: 13px | --space-3 (12px) | round to nearest scale step |
-| src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted (#F8F8F8) | near-duplicate of the token - replace with var(--color-surface-muted); no state and no theme, so it can wait for the next touch |
-
-## P2 - consolidation candidates
-
-| File:line | Value | Nearest token | Suggested fix |
-|---|---|---|---|
-| src/styles/tokens.css:11 + :12 | #F8F8F8 / #F9F9F9 | --color-surface-muted | token-to-token pair, 1 hex unit apart in the default theme - merge --color-surface-alt into --color-surface-muted, rename proposed below |
-| src/components/Modal.tsx:12 | z-index: 1000 | none defined | no z-index scale exists - route this value through the one the plan defines: the bottom of its three steps |
-| src/components/Dropdown.tsx:31 | z-index: 9999 | none defined | no z-index scale exists - route this value through the one the plan defines: the middle step, above the modal |
-| src/components/Toast.tsx:7 | z-index: 10000 | none defined | no z-index scale exists - route this value through the one the plan defines: the top step, above the dropdown |
-
-## Proposed renames (do not apply silently)
---color-surface-alt -> --color-surface-muted (merged into the survivor by the P2 pair above,
-not a name that stopped matching its use). Call sites: src/components/Panel.tsx:18,
-src/components/Sidebar.tsx:44, src/marketing/Hero.tsx:7, src/styles/cards.css:22.
+| src/marketing/Banner.tsx:9 | #F7F7F7 | --color-surface-muted | no state, no theme - replace when the file is next touched |
 
 ## Consolidation plan
-1. Replace #2563EB in Button.tsx:42 with var(--color-primary).
-2. Replace the overlay rgba() literal in Modal.tsx:88 with var(--color-overlay).
-3. Replace #F7F7F7 in Banner.tsx:9 with var(--color-surface-muted) - it is half of both
-   dissolved pairs, so this ends them too.
-4. Round padding: 13px in Card.tsx:15 to var(--space-3).
-5. After the rename is approved, merge --color-surface-alt into --color-surface-muted across
-   its 4 call sites.
-6. Define a z-index scale and route the three literals through it.
+1. Replace 3 raw #2563EB literals in Button.tsx with the existing primary token.
+2. Replace the overlay rgba() literal in Modal.tsx with --color-overlay.
+3. Round the 9 off-scale spacing values to the nearest 4px step, one component at a time.
 ```
 
-The report is complete as shown, and its numbers reconcile the way the skill requires: three
-raw colors and three raw-color rows, one off-scale value and one row, three z-index literals
-and three rows. The pair count is the exception that is counted but not row-matched - one
-token-to-token pair opens the P2 row, and the two the Banner literal is half of are fixed by
-replacing it, so they are named in the split instead of billed twice. Font sizes, radius and
-shadow are inventory counts: all three sit inside their thresholds, which the summary prints
-beside each count, so they are listed by value and open no rows at all.
+Abridged - the P2 table and the rename proposal are cut here, so the summary counts above run
+ahead of the rows shown.
 
 ## How it works
 
@@ -155,34 +127,16 @@ beside each count, so they are listed by value and open no rows at all.
   right categories instead of being missed and then counted as drift against themselves.
   Nothing counts as drift until there is a known-good value to drift from: a category with
   no tokens is reported as having no baseline, never as zero findings.
-- **One name, one value per theme.** A themed codebase defines `--color-surface` twice on
-  purpose - white in the base block, near-black under `[data-theme="dark"]` - so the token
-  record keeps both and says which theme each belongs to. Literals are matched against the
-  palette of the theme they render in, and two colors that never appear on screen together are
-  never proposed as a merge.
 - **File:line, not vibes.** Every finding traces to a real location the skill scanned. Nothing
   in the report is invented or estimated.
 - **Category by category.** Colors, spacing, near-duplicates, font sizes, radii, shadows, and
   z-index are scanned and reported separately, since each has a different fix and owner.
-- **One literal, one row.** A value can belong to two categories at once: a raw `#F7F7F7`
-  sitting next to a `--color-surface-muted: #F8F8F8` is both a raw-color finding and half a
-  near-duplicate pair. It still gets one row and one fix, because replacing the literal with
-  the token also ends the pair. The summary says how many pairs resolve that way and how many
-  are token-to-token, which is the only shape needing a merge of the token set itself.
-- **Every fix cell reads alone.** The tables are sorted by severity and a reader lands on one
-  row from a `File:line` match in their own diff, so no cell leans on a proposal made in a row
-  above it. Where several literals close against one scale that does not exist yet, each row
-  states the condition and its own step in that scale, and the consolidation plan carries the
-  single move that defines the scale and routes them all.
 - **Severity by damage, not by count.** A single hardcoded color on a hover state outranks
   fifty off-scale spacing values, because the color bug is user-visible today.
 - **Renames are proposals, never actions.** If a token's name no longer matches how it is
   used, the skill lists the rename separately for a human to approve.
 - **Smallest diff first.** The consolidation plan orders fixes so each one ships as its own
-  small, reviewable change, not one giant sweep across the codebase. The one finding whose
-  fix is a sweep by nature - an inventory count past its threshold, thirteen font sizes
-  where the bound is 10 - is split into a step per value retired rather than exempted
-  from the rule, and the steps stop once the count is back inside the bound.
+  small, reviewable change, not one giant sweep across the codebase.
 
 ## How is this different from just asking the model?
 
@@ -227,30 +181,16 @@ codebase against itself - font-size sprawl, radius and shadow counts, near-dupli
 ungoverned z-index - run either way, since they need no token to measure against. A partial
 token set is the normal starting shape, not a reason to refuse the audit.
 
-**Why does radius get four variants and shadow only three?**
-Because a pill or fully-rounded radius - `9999px`, `50%` - is a shape rather than a fourth
-step on the ramp. It does not interpolate with `sm`/`md`/`lg`, and a product reaches it on
-purpose, so a fourth radius value is not evidence of accretion. Shadow has no equivalent:
-every `box-shadow` value is a point on one elevation ramp, so a fourth depth is already past
-the 2-3 a considered scale uses. Each count prints the bound that applies to it, as one
-number rather than a range - a range never says which count opens the row, and one bound
-shared by two scales of different sizes leaves the fourth shadow depth above every scale the
-skill names and inside the printed target.
-
-**Does this work with dark mode, or more than one theme?**
-Yes, and the theme is part of how a finding is read. Each theme's palette is recorded
-separately - the base `:root` block plus every `[data-theme]` override, or the light and dark
-objects in a theme file - and a raw literal is compared against the palette of the theme its
-call site renders in, so a literal inside a dark block is never matched to a light token whose
-value is the opposite of it. Near-duplicate pairs are found within one theme for the same
-reason: two values that never render together are not a merge candidate, and the same token
-name carrying a different value per theme is the token working, not drift. The summary lists
-the themes found, so a report from a themed codebase says which palettes it read.
-
 **Does this work with Tailwind?**
 Yes. It compares class usage against `tailwind.config.js`'s theme and treats
 arbitrary-value classes like `bg-[#2563eb]` or `p-[13px]` as the drift signal, since those
 are exactly the places a value bypassed the theme.
+
+**Does it work with Tailwind v4, which has no tailwind.config.js?**
+Yes. Tailwind v4 declares the theme in CSS, inside an `@theme` block, and the
+skill reads that block as the token source. Without it, a v4 project would
+look like it had no tokens at all, and the audit would stop with nothing to
+compare against.
 
 ## Related skills
 

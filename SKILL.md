@@ -203,9 +203,15 @@ Near-duplicate colors, one-off z-index values, anything safe to leave but worth 
 |---|---|---|---|
 
 ## Proposed renames (do not apply silently)
-Only if a token's current name no longer matches its use (e.g. `--blue-500` used as an error
-color). List old name -> proposed name -> every call site. Do not rename in the report itself -
-this is a proposal for the user to approve.
+A rename earns a line here for one of two reasons, and the line says which:
+- **The name no longer matches its use** (e.g. `--blue-500` used as an error color).
+- **A token-and-token near-duplicate merges into a survivor** (Step 2's P2 pair). The loser's
+  name may be perfectly accurate; its call sites still have to move to the survivor's name,
+  so the move is proposed here like any other rename.
+
+Nothing else qualifies - a name you would merely prefer is not a finding. List old name ->
+proposed name -> reason -> every call site. Do not rename in the report itself - this is a
+proposal for the user to approve.
 
 ## Consolidation plan
 Ordered, smallest-diff-first. Each step is a single PR-sized change that ships independently

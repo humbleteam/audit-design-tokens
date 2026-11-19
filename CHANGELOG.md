@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.0] - 2026-11-19
+
+- The proposed-renames template opened "Only if a token's current name no longer matches its use", and the README's own worked rename says in its parenthesis that it is "not a name that stopped matching its use" - it is the loser of a token-and-token near-duplicate pair, merged into its survivor. Read literally, the template's "only if" excluded the one rename the repo demonstrates, and Step 2's merge instruction ("propose the rename for the loser's call sites") pointed at a section that did not admit it. Logged on 11-06 and taken today.
+- The section now names both reasons a rename qualifies - a name that no longer matches its use, and a near-duplicate merge into a survivor - says nothing else qualifies, so a preferred name is still not a finding, and adds a reason field to each line so the reader can tell which of the two applies.
+- The worked example already carries its reason in the parenthesis and needs no change. No severity, row or plan step moved.
+
 ## [1.14.0] - 2026-11-06
 
 - Step 3 promised that every consolidation-plan step "ships independently without waiting for the others", and step 5 of the README's worked plan opens with "After the rename is approved" - the one step in the skill's own example that carries a precondition, with no rule anywhere behind it. The item the 10-28 run logged as seen and not taken.

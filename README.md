@@ -252,6 +252,12 @@ Yes. It compares class usage against `tailwind.config.js`'s theme and treats
 arbitrary-value classes like `bg-[#2563eb]` or `p-[13px]` as the drift signal, since those
 are exactly the places a value bypassed the theme.
 
+**Does it flag a value computed from a token, like `darken(theme.primary, 0.1)`?**
+No. A value computed at runtime from a token already derives from that token, so it is not
+raw drift and opens no row. Only literals that reference no token at all are flagged. If the
+same derived shade is computed in many places, that is a design question about adding a named
+token, not a drift finding.
+
 ## Related skills
 
 Part of a 10-skill open-source kit for design teams by Humbleteam.

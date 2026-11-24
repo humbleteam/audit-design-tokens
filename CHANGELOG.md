@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.16.0] - 2026-11-24
+
+- `README.md` FAQ: new answer on values computed from a token, such as `darken(theme.primary, 0.1)`. They derive from a token and open no row; only literals that reference no token are flagged, matching the CSS-in-JS edge case in `SKILL.md`.
+
 ## [1.15.0] - 2026-11-19
 
 - The proposed-renames template opened "Only if a token's current name no longer matches its use", and the README's own worked rename says in its parenthesis that it is "not a name that stopped matching its use" - it is the loser of a token-and-token near-duplicate pair, merged into its survivor. Read literally, the template's "only if" excluded the one rename the repo demonstrates, and Step 2's merge instruction ("propose the rename for the loser's call sites") pointed at a section that did not admit it. Logged on 11-06 and taken today.
